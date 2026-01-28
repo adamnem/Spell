@@ -1,0 +1,24 @@
+{
+  "name": "Spell Stars - Spelling Practice",
+  "short_name": "Spell Stars",
+  "description": "A fun spelling practice game for kids with Wordle-style feedback",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f0f4ff",
+  "theme_color": "#4a90d9",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

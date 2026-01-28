@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#4a90d9">
+  <title>Spell Stars</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- Main Menu Screen -->
+    <div id="screen-menu" class="screen active">
+      <div class="menu-container">
+        <h1 class="app-title">Spell Stars</h1>
+        <p class="app-subtitle">Practice your spelling words!</p>
+        <div class="menu-buttons">
+          <button class="menu-btn btn-practice" onclick="App.navigate('game', 'current')">
+            <span class="btn-icon">&#9998;</span>
+            Practice This Week
+          </button>
+          <button class="menu-btn btn-review" onclick="App.navigate('game', 'review')">
+            <span class="btn-icon">&#128218;</span>
+            Review Previous Words
+          </button>
+          <button class="menu-btn btn-upload" onclick="App.navigate('upload')">
+            <span class="btn-icon">&#128247;</span>
+            Upload New Word List
+          </button>
+          <button class="menu-btn btn-progress" onclick="App.navigate('progress')">
+            <span class="btn-icon">&#128202;</span>
+            Progress Report
+          </button>
+          <button class="menu-btn btn-manage" onclick="App.navigate('manage')">
+            <span class="btn-icon">&#9881;</span>
+            Manage Word Lists
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="screen-game" class="screen">
+      <div class="game-container">
+        <div class="game-header">
+          <button class="back-btn" onclick="App.navigate('menu')">&#8592; Back</button>
+          <div class="game-info">
+            <span id="game-word-count"></span>
+          </div>
+        </div>
+
+        <div id="game-message" class="game-message"></div>
+
+        <div class="audio-controls">
+          <button id="btn-hear-word" class="hear-btn" onclick="Game.speakWord()">
+            &#128266; Hear the Word
+          </button>
+        </div>
+
+        <div id="game-board" class="game-board">
+          <!-- Rows will be dynamically generated -->
+        </div>
+
+        <div id="game-length-hint" class="length-hint hidden"></div>
+
+        <div id="keyboard" class="keyboard">
+          <div class="keyboard-row">
+            <button class="key" data-key="q">Q</button>
+            <button class="key" data-key="w">W</button>
+            <button class="key" data-key="e">E</button>
+            <button class="key" data-key="r">R</button>
+            <button class="key" data-key="t">T</button>
+            <button class="key" data-key="y">Y</button>
+            <button class="key" data-key="u">U</button>
+            <button class="key" data-key="i">I</button>
+            <button class="key" data-key="o">O</button>
+            <button class="key" data-key="p">P</button>
+          </div>
+          <div class="keyboard-row">
+            <div class="spacer-half"></div>
+            <button class="key" data-key="a">A</button>
+            <button class="key" data-key="s">S</button>
+            <button class="key" data-key="d">D</button>
+            <button class="key" data-key="f">F</button>
+            <button class="key" data-key="g">G</button>
+            <button class="key" data-key="h">H</button>
+            <button class="key" data-key="j">J</button>
+            <button class="key" data-key="k">K</button>
+            <button class="key" data-key="l">L</button>
+            <div class="spacer-half"></div>
+          </div>
+          <div class="keyboard-row">
+            <button class="key key-wide" data-key="Enter">ENTER</button>
+            <button class="key" data-key="z">Z</button>
+            <button class="key" data-key="x">X</button>
+            <button class="key" data-key="c">C</button>
+            <button class="key" data-key="v">V</button>
+            <button class="key" data-key="b">B</button>
+            <button class="key" data-key="n">N</button>
+            <button class="key" data-key="m">M</button>
+            <button class="key key-wide" data-key="Backspace">&#9003;</button>
+          </div>
+        </div>
+
+        <!-- Game Result Overlay -->
+        <div id="game-result" class="game-result hidden">
+          <div class="result-content">
+            <div id="result-icon" class="result-icon"></div>
+            <h2 id="result-title"></h2>
+            <p id="result-message"></p>
+            <p id="result-word" class="result-word"></p>
+            <div class="result-buttons">
+              <button class="menu-btn btn-practice" onclick="Game.nextWord()">Next Word</button>
+              <button class="menu-btn btn-review" onclick="App.navigate('menu')">Back to Menu</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Screen -->
+    <div id="screen-upload" class="screen">
+      <div class="upload-container">
+        <div class="screen-header">
+          <button class="back-btn" onclick="App.navigate('menu')">&#8592; Back</button>
+          <h2>Upload Word List</h2>
+        </div>
+
+        <div id="upload-step-1" class="upload-step">
+          <p>Take a photo of your spelling list or select an image.</p>
+          <div class="upload-area" id="upload-area">
+            <input type="file" id="file-input" accept="image/*" capture="environment" onchange="OCR.handleFileSelect(event)">
+            <label for="file-input" class="upload-label">
+              <span class="upload-icon">&#128247;</span>
+              <span>Tap to take a photo or choose an image</span>
+            </label>
+          </div>
+          <div id="ocr-preview" class="ocr-preview hidden">
+            <img id="ocr-image" alt="Uploaded spelling list">
+          </div>
+          <div id="ocr-status" class="ocr-status hidden">
+            <div class="spinner"></div>
+            <span id="ocr-status-text">Reading words from image...</span>
+          </div>
+          <div class="manual-entry">
+            <p>Or type words manually:</p>
+            <button class="menu-btn btn-upload" onclick="OCR.showManualEntry()">Type Words Instead</button>
+          </div>
+        </div>
+
+        <div id="upload-step-2" class="upload-step hidden">
+          <p>Review the words below. You can edit, add, or remove words.</p>
+          <div id="word-edit-list" class="word-edit-list">
+            <!-- Editable word items will go here -->
+          </div>
+          <button class="add-word-btn" onclick="OCR.addWordField()">+ Add Word</button>
+          <div class="week-input">
+            <label for="week-number">Week Number:</label>
+            <input type="number" id="week-number" min="1" max="52" placeholder="e.g. 1">
+            <label for="week-date">Date:</label>
+            <input type="date" id="week-date">
+          </div>
+          <button class="menu-btn btn-practice" onclick="OCR.saveWordList()">Save Word List</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Screen -->
+    <div id="screen-progress" class="screen">
+      <div class="progress-container">
+        <div class="screen-header">
+          <button class="back-btn" onclick="App.navigate('menu')">&#8592; Back</button>
+          <h2>Progress Report</h2>
+        </div>
+        <div id="progress-stats" class="progress-stats">
+          <!-- Stats will be rendered here -->
+        </div>
+        <div id="progress-words" class="progress-words">
+          <!-- Per-word progress will be rendered here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Manage Word Lists Screen -->
+    <div id="screen-manage" class="screen">
+      <div class="manage-container">
+        <div class="screen-header">
+          <button class="back-btn" onclick="App.navigate('menu')">&#8592; Back</button>
+          <h2>Manage Word Lists</h2>
+        </div>
+        <div id="manage-lists" class="manage-lists">
+          <!-- Word lists will be rendered here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Celebration Canvas (for confetti) -->
+    <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/tts.js"></script>
+  <script src="js/spaced-rep.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ocr.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
