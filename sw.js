@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spell-stars-v3';
+const CACHE_NAME = 'spell-stars-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

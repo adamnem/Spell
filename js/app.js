@@ -189,10 +189,44 @@ const App = (() => {
     return div.innerHTML;
   }
 
+  // === Settings Modal ===
+
+  function openSettings() {
+    const modal = document.getElementById('settings-modal');
+    const slider = document.getElementById('voice-speed');
+    const valueEl = document.getElementById('voice-speed-value');
+
+    const settings = Storage.getSettings();
+    slider.value = settings.voiceRate || 0.8;
+    valueEl.textContent = slider.value + 'x';
+
+    slider.oninput = () => {
+      valueEl.textContent = slider.value + 'x';
+    };
+
+    modal.classList.remove('hidden');
+  }
+
+  function closeSettings() {
+    document.getElementById('settings-modal').classList.add('hidden');
+  }
+
+  function saveSettings() {
+    const slider = document.getElementById('voice-speed');
+    const settings = Storage.getSettings();
+    settings.voiceRate = parseFloat(slider.value);
+    Storage.saveSettings(settings);
+    closeSettings();
+    showToast('Settings saved!');
+  }
+
   return {
     navigate,
     showToast,
     escapeHTML,
     formatDate,
+    openSettings,
+    closeSettings,
+    saveSettings,
   };
 })();

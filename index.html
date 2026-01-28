@@ -78,6 +78,12 @@
           <button id="input-mode-toggle" class="input-mode-toggle" onclick="Game.toggleInputMode()">
             &#9997; Write
           </button>
+          <button id="btn-settings" class="settings-btn" onclick="App.openSettings()" title="Settings">
+            &#9881;
+          </button>
+        </div>
+        <div class="parent-help">
+          <button id="btn-reveal" class="reveal-link" onclick="Game.revealWord()">Parent: Reveal Word</button>
         </div>
 
         <div id="game-board" class="game-board">
@@ -244,6 +250,47 @@
 
     <!-- Celebration Canvas (for confetti) -->
     <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-backdrop" onclick="App.closeSettings()"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Settings</h3>
+          <button class="modal-close" onclick="App.closeSettings()">&#10005;</button>
+        </div>
+        <div class="modal-body">
+          <div class="setting-item">
+            <label for="voice-speed">Voice Speed</label>
+            <div class="setting-control">
+              <input type="range" id="voice-speed" min="0.5" max="1.2" step="0.1" value="0.8">
+              <span id="voice-speed-value">0.8x</span>
+            </div>
+            <p class="setting-hint">Slower speech can help with difficult words</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="menu-btn btn-practice" onclick="App.saveSettings()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reveal Word Modal -->
+    <div id="reveal-modal" class="modal hidden">
+      <div class="modal-backdrop" onclick="Game.hideReveal()"></div>
+      <div class="modal-content modal-small">
+        <div class="modal-header">
+          <h3>The word is:</h3>
+          <button class="modal-close" onclick="Game.hideReveal()">&#10005;</button>
+        </div>
+        <div class="modal-body">
+          <p id="reveal-word" class="reveal-word-display"></p>
+        </div>
+        <div class="modal-footer">
+          <button class="menu-btn btn-review" onclick="Game.hideReveal()">Got it</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="js/storage.js"></script>

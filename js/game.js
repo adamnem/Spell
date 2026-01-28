@@ -464,12 +464,30 @@ const Game = (() => {
   // Init keyboard on load
   document.addEventListener('DOMContentLoaded', setupKeyboard);
 
+  function revealWord() {
+    const modal = document.getElementById('reveal-modal');
+    const wordEl = document.getElementById('reveal-word');
+    if (modal && wordEl) {
+      wordEl.textContent = currentWord.toUpperCase();
+      modal.classList.remove('hidden');
+    }
+  }
+
+  function hideReveal() {
+    const modal = document.getElementById('reveal-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+  }
+
   return {
     init,
     nextWord,
     speakWord,
     handleKey,
     toggleInputMode,
+    revealWord,
+    hideReveal,
   };
 })();
 

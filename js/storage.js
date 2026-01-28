@@ -158,7 +158,7 @@ const Storage = (() => {
   // === Settings ===
 
   function getSettings() {
-    return _get(KEYS.SETTINGS) || { voiceRate: 0.85, voicePitch: 1.0 };
+    return _get(KEYS.SETTINGS) || { voiceRate: 0.8, voicePitch: 1.0 };
   }
 
   function saveSettings(settings) {
