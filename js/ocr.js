@@ -1,5 +1,5 @@
 /**
- * OCR module - handles image upload and text extraction using Tesseract.js.
+ * OCR module - handles image upload, bulk entry, and text extraction.
  */
 const OCR = (() => {
   let tesseractLoaded = false;
@@ -25,7 +25,6 @@ const OCR = (() => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Show preview
     const preview = document.getElementById('ocr-preview');
     const previewImg = document.getElementById('ocr-image');
     const reader = new FileReader();
@@ -77,34 +76,50 @@ const OCR = (() => {
     }
   }
 
-  /**
-   * Extract individual words from OCR text output.
-   * Filters for reasonable spelling words (alphabetic, 2-15 characters).
-   */
   function extractWords(text) {
-    // Split by whitespace, newlines, commas, numbers/bullets
     const raw = text.split(/[\s,;:\-\d.()[\]]+/);
-
     return raw
-      .map(w => w.replace(/[^a-zA-Z']/g, '').trim()) // Keep only letters and apostrophes
-      .filter(w => w.length >= 2 && w.length <= 15) // Reasonable word length
+      .map(w => w.replace(/[^a-zA-Z']/g, '').trim())
+      .filter(w => w.length >= 2 && w.length <= 15)
       .map(w => w.toLowerCase())
-      .filter((w, i, arr) => arr.indexOf(w) === i); // Deduplicate
+      .filter((w, i, arr) => arr.indexOf(w) === i);
   }
 
   function showManualEntry() {
     showEditStep([]);
   }
 
+  function showBulkEntry() {
+    _hideAllSteps();
+    document.getElementById('upload-step-bulk').classList.remove('hidden');
+    document.getElementById('bulk-words-input').value = '';
+    document.getElementById('bulk-words-input').focus();
+  }
+
+  function processBulkEntry() {
+    const text = document.getElementById('bulk-words-input').value;
+    const words = text
+      .split(/[\n,;]+/)
+      .map(w => w.replace(/[^a-zA-Z']/g, '').trim().toLowerCase())
+      .filter(w => w.length >= 1)
+      .filter((w, i, arr) => arr.indexOf(w) === i);
+
+    if (words.length === 0) {
+      App.showToast('No words found. Please enter at least one word.');
+      return;
+    }
+
+    showEditStep(words);
+  }
+
   function showEditStep(words) {
-    document.getElementById('upload-step-1').classList.add('hidden');
+    _hideAllSteps();
     document.getElementById('upload-step-2').classList.remove('hidden');
 
     const list = document.getElementById('word-edit-list');
     list.innerHTML = '';
 
     if (words.length === 0) {
-      // Start with a few empty fields
       for (let i = 0; i < 5; i++) {
         addWordField('');
       }
@@ -112,8 +127,19 @@ const OCR = (() => {
       words.forEach(w => addWordField(w));
     }
 
-    // Set default week date to today
-    document.getElementById('week-date').valueAsDate = new Date();
+    // Set default test date to next Friday
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
+    const nextFriday = new Date(today);
+    nextFriday.setDate(today.getDate() + daysUntilFriday);
+    document.getElementById('week-date').valueAsDate = nextFriday;
+  }
+
+  function _hideAllSteps() {
+    document.getElementById('upload-step-1').classList.add('hidden');
+    document.getElementById('upload-step-bulk').classList.add('hidden');
+    document.getElementById('upload-step-2').classList.add('hidden');
   }
 
   function addWordField(value) {
@@ -157,44 +183,50 @@ const OCR = (() => {
       return;
     }
 
-    const weekNumber = document.getElementById('week-number').value || '';
-    const weekDate = document.getElementById('week-date').value || new Date().toISOString().split('T')[0];
+    const listLabel = document.getElementById('week-label').value.trim() || '';
+    const testDate = document.getElementById('week-date').value || '';
 
-    const listId = `week-${weekNumber || 'x'}-${Date.now()}`;
+    const listId = `list-${Date.now()}`;
 
     const wordList = {
       id: listId,
-      weekNumber: parseInt(weekNumber) || null,
-      date: weekDate,
+      weekNumber: null,
+      label: listLabel || null,
+      date: null,
+      testDate: testDate || null,
       words: words,
+      tags: {},
+      defaultTag: null,
       createdAt: new Date().toISOString(),
+      isBuiltIn: false,
     };
 
     Storage.saveWordList(wordList);
 
     App.showToast(`Saved ${words.length} words!`);
 
-    // Reset upload form
     resetUploadForm();
 
-    // Navigate to menu
     setTimeout(() => App.navigate('menu'), 800);
   }
 
   function resetUploadForm() {
     document.getElementById('upload-step-1').classList.remove('hidden');
+    document.getElementById('upload-step-bulk').classList.add('hidden');
     document.getElementById('upload-step-2').classList.add('hidden');
     document.getElementById('ocr-preview').classList.add('hidden');
     document.getElementById('ocr-status').classList.add('hidden');
     document.getElementById('file-input').value = '';
     document.getElementById('word-edit-list').innerHTML = '';
-    document.getElementById('week-number').value = '';
+    document.getElementById('week-label').value = '';
     document.getElementById('week-date').value = '';
   }
 
   return {
     handleFileSelect,
     showManualEntry,
+    showBulkEntry,
+    processBulkEntry,
     addWordField,
     saveWordList,
     resetUploadForm,

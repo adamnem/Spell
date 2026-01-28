@@ -836,6 +836,164 @@ body {
   margin-bottom: 20px;
 }
 
+/* === List Picker Screen === */
+.pick-list-container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.pick-list-subtitle {
+  color: var(--text-light);
+  margin-bottom: 16px;
+}
+
+.pick-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pick-list-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border-left: 4px solid var(--primary);
+}
+
+.pick-list-card:active {
+  transform: scale(0.98);
+}
+
+.pick-list-card-title {
+  font-weight: 700;
+  font-size: 1.15rem;
+  margin-bottom: 4px;
+}
+
+.pick-list-card-date {
+  font-size: 0.85rem;
+  color: var(--primary);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.pick-list-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.pick-list-tag {
+  background: #ede9fe;
+  color: #7c3aed;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pick-list-card-meta {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+/* === Tag Badge (in game) === */
+.tag-badge {
+  text-align: center;
+  padding: 4px 16px;
+  margin-bottom: 2px;
+}
+
+.tag-badge:not(.hidden) {
+  display: inline-block;
+  align-self: center;
+  background: #ede9fe;
+  color: #7c3aed;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin: 0 auto 4px;
+}
+
+.result-tag {
+  font-size: 0.85rem !important;
+  color: #7c3aed !important;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* === Bulk Entry === */
+.bulk-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--light-gray);
+  border-radius: var(--radius);
+  font-size: 1.05rem;
+  font-family: var(--font);
+  color: var(--text);
+  resize: vertical;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.bulk-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.manual-entry-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.manual-entry-buttons .menu-btn {
+  flex: 1;
+  font-size: 0.95rem;
+  padding: 14px 16px;
+}
+
+/* === Progress Tag Labels === */
+.progress-tag-group-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #7c3aed;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 0 4px;
+  border-bottom: 1px solid #ede9fe;
+  margin-bottom: 4px;
+}
+
+.progress-word-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.progress-word-tag-badge {
+  font-size: 0.7rem;
+  color: #7c3aed;
+  font-weight: 500;
+}
+
+/* === Built-in Badge === */
+.built-in-badge {
+  display: inline-block;
+  background: #dbeafe;
+  color: var(--primary);
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
 /* === Responsive === */
 @media (max-width: 380px) {
   .tile {

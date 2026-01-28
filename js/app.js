@@ -2,7 +2,12 @@
  * App module - main controller, screen navigation, and initialization.
  */
 const App = (() => {
-  const screens = ['menu', 'game', 'upload', 'progress', 'manage'];
+  const screens = ['menu', 'pick-list', 'game', 'upload', 'progress', 'manage'];
+
+  function init() {
+    // Load built-in class lists on first run
+    ClassLists.init();
+  }
 
   function navigate(screen, param) {
     // Hide all screens
@@ -18,6 +23,9 @@ const App = (() => {
 
     // Screen-specific initialization
     switch (screen) {
+      case 'pick-list':
+        renderListPicker();
+        break;
       case 'game':
         startGame(param);
         break;
@@ -34,21 +42,25 @@ const App = (() => {
   }
 
   function startGame(mode) {
-    mode = mode || 'current';
+    if (!mode) {
+      showToast('Please pick a list first.');
+      navigate('pick-list');
+      return;
+    }
 
-    // Check if there are words to practice
-    if (mode === 'current') {
-      const list = Storage.getCurrentWeekList();
-      if (!list || list.words.length === 0) {
-        showToast('No words yet! Upload a word list first.');
+    if (mode === 'review') {
+      const allWords = Storage.getAllWords();
+      if (allWords.length === 0) {
+        showToast('No words to review! Add a word list first.');
         navigate('menu');
         return;
       }
     } else {
-      const allWords = Storage.getAllWords();
-      if (allWords.length === 0) {
-        showToast('No words to review! Upload a word list first.');
-        navigate('menu');
+      // mode is a list ID
+      const list = Storage.getWordList(mode);
+      if (!list || list.words.length === 0) {
+        showToast('That list has no words.');
+        navigate('pick-list');
         return;
       }
     }
@@ -56,8 +68,92 @@ const App = (() => {
     Game.init(mode);
   }
 
+  // === List Picker ===
+
+  function renderListPicker() {
+    const container = document.getElementById('pick-list-items');
+    const lists = Storage.getWordLists();
+    const progress = Storage.getWordProgress();
+
+    if (lists.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">&#128203;</div>
+          <p>No word lists yet! Add one to get started.</p>
+          <button class="menu-btn btn-upload" onclick="App.navigate('upload')">
+            <span class="btn-icon">&#128247;</span>
+            Add Word List
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+
+    for (const list of lists) {
+      const title = _getListTitle(list);
+      const testDateStr = list.testDate ? formatDate(list.testDate) : '';
+
+      // Calculate list progress
+      let practiced = 0;
+      let mastered = 0;
+      for (const word of list.words) {
+        const p = progress[word.toLowerCase()];
+        if (p && p.totalAttempts > 0) {
+          practiced++;
+          if (p.successRate >= 0.8) mastered++;
+        }
+      }
+
+      const tags = _getUniqueTags(list);
+      const tagsHtml = tags.length > 0
+        ? tags.map(t => `<span class="pick-list-tag">${escapeHTML(t)}</span>`).join('')
+        : '';
+
+      html += `
+        <div class="pick-list-card" onclick="App.navigate('game', '${list.id}')">
+          <div class="pick-list-card-title">${escapeHTML(title)}</div>
+          ${testDateStr ? `<div class="pick-list-card-date">Test: ${escapeHTML(testDateStr)}</div>` : ''}
+          ${tagsHtml ? `<div class="pick-list-card-tags">${tagsHtml}</div>` : ''}
+          <div class="pick-list-card-meta">
+            ${list.words.length} words &middot; ${practiced} practiced &middot; ${mastered} mastered
+          </div>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function _getListTitle(list) {
+    if (list.label) return list.label;
+    if (list.weekNumber) return `Week ${list.weekNumber}`;
+    if (list.testDate) return `Test ${formatDate(list.testDate)}`;
+    return 'Word List';
+  }
+
+  function _getUniqueTags(list) {
+    const tagSet = new Set();
+    if (list.defaultTag) tagSet.add(list.defaultTag);
+    if (list.tags) {
+      for (const tag of Object.values(list.tags)) {
+        tagSet.add(tag);
+      }
+    }
+    return Array.from(tagSet);
+  }
+
+  function formatDate(dateStr) {
+    try {
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  }
+
   function showToast(message) {
-    // Remove existing toasts
     document.querySelectorAll('.toast').forEach(t => t.remove());
 
     const toast = document.createElement('div');
@@ -78,6 +174,9 @@ const App = (() => {
       }
       lastTouchEnd = now;
     }, false);
+
+    // Initialize app
+    init();
   });
 
   /**
@@ -94,5 +193,6 @@ const App = (() => {
     navigate,
     showToast,
     escapeHTML,
+    formatDate,
   };
 })();

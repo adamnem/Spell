@@ -14,7 +14,7 @@ const Progress = (() => {
     const progress = Storage.getWordProgress();
 
     let totalPracticed = 0;
-    let totalMastered = 0; // success rate >= 80%
+    let totalMastered = 0;
     let totalAttempts = 0;
 
     for (const w of allWords) {
@@ -55,42 +55,80 @@ const Progress = (() => {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">&#128214;</div>
-          <p>No words yet! Upload a word list to get started.</p>
+          <p>No words yet! Add a word list to get started.</p>
         </div>
       `;
       return;
     }
 
-    // Group by week
     const lists = Storage.getWordLists();
     let html = '';
 
-    // First show "Needs Practice" section
+    // "Needs Practice" section
     const needsPractice = SpacedRep.getWordsNeedingPractice(20)
       .filter(w => w.urgency > 20);
 
     if (needsPractice.length > 0) {
       html += '<h3 class="progress-section-title">Needs More Practice</h3>';
       for (const w of needsPractice) {
-        html += renderWordItem(w.word, w.progress);
+        const tag = Storage.getTagForWord(w.word, w.weekId);
+        html += renderWordItem(w.word, w.progress, tag);
       }
     }
 
-    // Then show all words by list
+    // Show words grouped by list, then by tag within each list
     for (const list of lists) {
-      const label = list.weekNumber ? `Week ${list.weekNumber}` : `List from ${list.date}`;
-      html += `<h3 class="progress-section-title">${App.escapeHTML(label)}</h3>`;
+      const title = _getListTitle(list);
+      const testInfo = list.testDate ? ` &middot; Test: ${App.escapeHTML(App.formatDate(list.testDate))}` : '';
+      html += `<h3 class="progress-section-title">${App.escapeHTML(title)}${testInfo}</h3>`;
 
-      for (const word of list.words) {
-        const p = progress[word.toLowerCase()] || null;
-        html += renderWordItem(word, p);
+      // Group words by tag
+      const tagGroups = _groupWordsByTag(list);
+
+      for (const group of tagGroups) {
+        if (group.tag && tagGroups.length > 1) {
+          html += `<div class="progress-tag-group-label">${App.escapeHTML(group.tag)}</div>`;
+        }
+        for (const word of group.words) {
+          const p = progress[word.toLowerCase()] || null;
+          html += renderWordItem(word, p, group.tag);
+        }
       }
     }
 
     container.innerHTML = html;
   }
 
-  function renderWordItem(word, progress) {
+  function _getListTitle(list) {
+    if (list.label) return list.label;
+    if (list.weekNumber) return `Week ${list.weekNumber}`;
+    if (list.testDate) return `Test ${App.formatDate(list.testDate)}`;
+    return 'Word List';
+  }
+
+  function _groupWordsByTag(list) {
+    const groups = {};
+
+    for (const word of list.words) {
+      const tag = Storage.getTagForWord(word, list.id) || '(no tag)';
+      if (!groups[tag]) {
+        groups[tag] = [];
+      }
+      groups[tag].push(word);
+    }
+
+    // Sort: default tag first, then alphabetically
+    const keys = Object.keys(groups);
+    keys.sort((a, b) => {
+      if (a === list.defaultTag) return -1;
+      if (b === list.defaultTag) return 1;
+      return a.localeCompare(b);
+    });
+
+    return keys.map(tag => ({ tag: tag === '(no tag)' ? null : tag, words: groups[tag] }));
+  }
+
+  function renderWordItem(word, progress, tag) {
     let rate = 0;
     let rateText = 'New';
     let barClass = 'needs-work';
@@ -107,9 +145,16 @@ const Progress = (() => {
       if (rate < 50) needsPracticeClass = 'needs-practice';
     }
 
+    const tagBadge = tag
+      ? `<span class="progress-word-tag-badge">${App.escapeHTML(tag)}</span>`
+      : '';
+
     return `
       <div class="progress-word-item ${needsPracticeClass}">
-        <span class="progress-word-text">${App.escapeHTML(word)}</span>
+        <div class="progress-word-left">
+          <span class="progress-word-text">${App.escapeHTML(word)}</span>
+          ${tagBadge}
+        </div>
         <div class="progress-word-stats">
           <div class="progress-bar-container">
             <div class="progress-bar-fill ${barClass}" style="width: ${rate}%"></div>
@@ -125,16 +170,15 @@ const Progress = (() => {
   function renderManageScreen() {
     const container = document.getElementById('manage-lists');
     const lists = Storage.getWordLists();
-    const currentWeekId = Storage.getCurrentWeekId();
 
     if (lists.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">&#128203;</div>
-          <p>No word lists yet! Upload one to get started.</p>
+          <p>No word lists yet! Add one to get started.</p>
           <button class="menu-btn btn-upload" onclick="App.navigate('upload')">
             <span class="btn-icon">&#128247;</span>
-            Upload Word List
+            Add Word List
           </button>
         </div>
       `;
@@ -144,24 +188,29 @@ const Progress = (() => {
     let html = '';
 
     for (const list of lists) {
-      const isCurrent = list.id === currentWeekId;
-      const label = list.weekNumber ? `Week ${list.weekNumber}` : 'Word List';
-      const dateStr = list.date || '';
+      const title = _getListTitle(list);
+      const testDateStr = list.testDate ? App.formatDate(list.testDate) : '';
+      const builtInBadge = list.isBuiltIn ? '<span class="built-in-badge">Class List</span>' : '';
 
       html += `
         <div class="manage-list-card">
           <div class="manage-list-header">
             <div>
-              <div class="manage-list-title">${App.escapeHTML(label)} ${isCurrent ? '(Current)' : ''}</div>
-              <div class="manage-list-meta">${App.escapeHTML(dateStr)} &middot; ${list.words.length} words</div>
+              <div class="manage-list-title">${App.escapeHTML(title)} ${builtInBadge}</div>
+              <div class="manage-list-meta">
+                ${testDateStr ? `Test: ${App.escapeHTML(testDateStr)} &middot; ` : ''}${list.words.length} words
+              </div>
             </div>
           </div>
           <div class="manage-list-words">
-            ${list.words.map(w => `<span class="manage-word-tag">${App.escapeHTML(w)}</span>`).join('')}
+            ${list.words.map(w => {
+              const tag = Storage.getTagForWord(w, list.id);
+              const tagAttr = tag ? ` title="${App.escapeHTML(tag)}"` : '';
+              return `<span class="manage-word-tag"${tagAttr}>${App.escapeHTML(w)}</span>`;
+            }).join('')}
           </div>
           <div class="manage-list-actions">
-            ${!isCurrent ? `<button class="btn-set-current" onclick="Progress.setCurrentWeek('${list.id}')">Set as Current</button>` : ''}
-            <button class="btn-delete-list" onclick="Progress.confirmDeleteList('${list.id}', '${label}')">Delete</button>
+            <button class="btn-delete-list" onclick="Progress.confirmDeleteList('${list.id}', '${App.escapeHTML(title)}')">Delete</button>
           </div>
         </div>
       `;
@@ -170,15 +219,14 @@ const Progress = (() => {
     container.innerHTML = html;
   }
 
-  function setCurrentWeek(listId) {
-    Storage.setCurrentWeek(listId);
-    renderManageScreen();
-    App.showToast('Current week updated!');
-  }
-
   function confirmDeleteList(listId, label) {
     if (confirm(`Delete "${label}" and all its words? This cannot be undone.`)) {
       Storage.deleteWordList(listId);
+      // Also remove from class lists loaded tracker if built-in
+      const loaded = localStorage.getItem('spell_classListsLoaded') || '';
+      const loadedIds = loaded.split(',').filter(id => id !== listId);
+      localStorage.setItem('spell_classListsLoaded', loadedIds.join(','));
+
       renderManageScreen();
       App.showToast('Word list deleted.');
     }
@@ -187,7 +235,6 @@ const Progress = (() => {
   return {
     renderProgressScreen,
     renderManageScreen,
-    setCurrentWeek,
     confirmDeleteList,
   };
 })();

@@ -31,7 +31,7 @@ const SpacedRep = (() => {
 
   /**
    * Select the next word to practice.
-   * @param {string} mode - 'current' for this week, 'review' for mixed review
+   * @param {string} mode - a list ID for specific list, or 'review' for all words
    * @returns {{ word: string, weekId: string } | null}
    */
   function selectNextWord(mode, excludeWords) {
@@ -42,18 +42,7 @@ const SpacedRep = (() => {
 
     let candidates = [];
 
-    if (mode === 'current') {
-      const currentList = Storage.getCurrentWeekList();
-      if (!currentList || currentList.words.length === 0) return null;
-
-      candidates = currentList.words
-        .filter(w => !excludeSet.has(w.toLowerCase()))
-        .map(w => ({
-          word: w.toLowerCase(),
-          weekId: currentList.id,
-          progress: progress[w.toLowerCase()] || null,
-        }));
-    } else {
+    if (mode === 'review') {
       // Review mode: all words from all lists
       const allWords = Storage.getAllWords();
       candidates = allWords
@@ -62,6 +51,18 @@ const SpacedRep = (() => {
           word: w.word,
           weekId: w.weekId,
           progress: progress[w.word] || null,
+        }));
+    } else {
+      // Specific list mode: mode is a list ID
+      const list = Storage.getWordList(mode);
+      if (!list || list.words.length === 0) return null;
+
+      candidates = list.words
+        .filter(w => !excludeSet.has(w.toLowerCase()))
+        .map(w => ({
+          word: w.toLowerCase(),
+          weekId: list.id,
+          progress: progress[w.toLowerCase()] || null,
         }));
     }
 

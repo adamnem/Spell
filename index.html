@@ -20,17 +20,17 @@
         <h1 class="app-title">Spell Stars</h1>
         <p class="app-subtitle">Practice your spelling words!</p>
         <div class="menu-buttons">
-          <button class="menu-btn btn-practice" onclick="App.navigate('game', 'current')">
+          <button class="menu-btn btn-practice" onclick="App.navigate('pick-list')">
             <span class="btn-icon">&#9998;</span>
-            Practice This Week
+            Practice Spelling
           </button>
           <button class="menu-btn btn-review" onclick="App.navigate('game', 'review')">
             <span class="btn-icon">&#128218;</span>
-            Review Previous Words
+            Review All Words
           </button>
           <button class="menu-btn btn-upload" onclick="App.navigate('upload')">
             <span class="btn-icon">&#128247;</span>
-            Upload New Word List
+            Add New Word List
           </button>
           <button class="menu-btn btn-progress" onclick="App.navigate('progress')">
             <span class="btn-icon">&#128202;</span>
@@ -40,6 +40,20 @@
             <span class="btn-icon">&#9881;</span>
             Manage Word Lists
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- List Picker Screen -->
+    <div id="screen-pick-list" class="screen">
+      <div class="pick-list-container">
+        <div class="screen-header">
+          <button class="back-btn" onclick="App.navigate('menu')">&#8592; Back</button>
+          <h2>Pick a List</h2>
+        </div>
+        <p class="pick-list-subtitle">Choose which words to practice:</p>
+        <div id="pick-list-items" class="pick-list-items">
+          <!-- List cards rendered dynamically -->
         </div>
       </div>
     </div>
@@ -54,6 +68,7 @@
           </div>
         </div>
 
+        <div id="game-tag-badge" class="tag-badge hidden"></div>
         <div id="game-message" class="game-message"></div>
 
         <div class="audio-controls">
@@ -114,6 +129,7 @@
             <h2 id="result-title"></h2>
             <p id="result-message"></p>
             <p id="result-word" class="result-word"></p>
+            <p id="result-tag" class="result-tag"></p>
             <div class="result-buttons">
               <button class="menu-btn btn-practice" onclick="Game.nextWord()">Next Word</button>
               <button class="menu-btn btn-review" onclick="App.navigate('menu')">Back to Menu</button>
@@ -128,7 +144,7 @@
       <div class="upload-container">
         <div class="screen-header">
           <button class="back-btn" onclick="App.navigate('menu')">&#8592; Back</button>
-          <h2>Upload Word List</h2>
+          <h2>Add Word List</h2>
         </div>
 
         <div id="upload-step-1" class="upload-step">
@@ -148,9 +164,19 @@
             <span id="ocr-status-text">Reading words from image...</span>
           </div>
           <div class="manual-entry">
-            <p>Or type words manually:</p>
-            <button class="menu-btn btn-upload" onclick="OCR.showManualEntry()">Type Words Instead</button>
+            <p>Or enter words yourself:</p>
+            <div class="manual-entry-buttons">
+              <button class="menu-btn btn-upload" onclick="OCR.showManualEntry()">Type One by One</button>
+              <button class="menu-btn btn-review" onclick="OCR.showBulkEntry()">Paste a List</button>
+            </div>
           </div>
+        </div>
+
+        <!-- Bulk Entry Step -->
+        <div id="upload-step-bulk" class="upload-step hidden">
+          <p>Type or paste your words below, one word per line:</p>
+          <textarea id="bulk-words-input" class="bulk-textarea" rows="12" placeholder="apple&#10;banana&#10;cherry&#10;dragon&#10;elephant" spellcheck="false" autocapitalize="none"></textarea>
+          <button class="menu-btn btn-practice" onclick="OCR.processBulkEntry()">Next</button>
         </div>
 
         <div id="upload-step-2" class="upload-step hidden">
@@ -160,9 +186,9 @@
           </div>
           <button class="add-word-btn" onclick="OCR.addWordField()">+ Add Word</button>
           <div class="week-input">
-            <label for="week-number">Week Number:</label>
-            <input type="number" id="week-number" min="1" max="52" placeholder="e.g. 1">
-            <label for="week-date">Date:</label>
+            <label for="week-label">List Name:</label>
+            <input type="text" id="week-label" placeholder="e.g. Week 1">
+            <label for="week-date">Test Date:</label>
             <input type="date" id="week-date">
           </div>
           <button class="menu-btn btn-practice" onclick="OCR.saveWordList()">Save Word List</button>
@@ -203,7 +229,9 @@
     <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
   </div>
 
+  <script src="https://js.puter.com/v2/" defer></script>
   <script src="js/storage.js"></script>
+  <script src="js/class-lists.js"></script>
   <script src="js/tts.js"></script>
   <script src="js/spaced-rep.js"></script>
   <script src="js/game.js"></script>

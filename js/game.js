@@ -9,26 +9,32 @@ const Game = (() => {
   let guessNumber = 0;
   let guesses = [];
   let gameOver = false;
-  let mode = 'current'; // 'current' or 'review'
+  let mode = 'review'; // list ID or 'review'
+  let currentListId = null;
   let wordsPlayedThisSession = [];
   let wordCount = 0;
   let totalWordsInSession = 0;
   let lengthRevealed = false;
+  let currentWordTag = null;
 
   // Keyboard state
   let keyStates = {};
 
+  /**
+   * @param {string} gameMode - a specific list ID, or 'review' for all words
+   */
   function init(gameMode) {
     mode = gameMode;
+    currentListId = (mode !== 'review') ? mode : null;
     wordsPlayedThisSession = [];
     wordCount = 0;
 
     // Count total available words
-    if (mode === 'current') {
-      const list = Storage.getCurrentWeekList();
-      totalWordsInSession = list ? list.words.length : 0;
-    } else {
+    if (mode === 'review') {
       totalWordsInSession = Storage.getAllWords().length;
+    } else {
+      const list = Storage.getWordList(mode);
+      totalWordsInSession = list ? list.words.length : 0;
     }
 
     loadNextWord();
@@ -60,7 +66,11 @@ const Game = (() => {
     keyStates = {};
     wordCount++;
 
+    // Resolve tag for this word
+    currentWordTag = Storage.getTagForWord(currentWord, selected.weekId);
+
     updateWordCount();
+    updateTagBadge();
     renderBoard();
     updateKeyboard();
     hideResult();
@@ -278,6 +288,7 @@ const Game = (() => {
     document.getElementById('result-message').textContent =
       attempts === 1 ? 'You got it on the first try!' : `You got it in ${attempts} tries!`;
     document.getElementById('result-word').textContent = currentWord;
+    document.getElementById('result-tag').textContent = currentWordTag ? currentWordTag : '';
     document.getElementById('game-result').classList.remove('hidden');
 
     // Show next word button
@@ -297,6 +308,7 @@ const Game = (() => {
     document.getElementById('result-message').textContent =
       'The word was:';
     document.getElementById('result-word').textContent = currentWord;
+    document.getElementById('result-tag').textContent = currentWordTag ? currentWordTag : '';
     document.getElementById('game-result').classList.remove('hidden');
 
     // Show next word button
@@ -327,6 +339,16 @@ const Game = (() => {
 
   function hideLengthHint() {
     document.getElementById('game-length-hint').classList.add('hidden');
+  }
+
+  function updateTagBadge() {
+    const badge = document.getElementById('game-tag-badge');
+    if (currentWordTag) {
+      badge.textContent = currentWordTag;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
   }
 
   function shakeCurrentRow() {

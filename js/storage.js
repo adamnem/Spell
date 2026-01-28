@@ -130,6 +130,31 @@ const Storage = (() => {
     return words;
   }
 
+  // === Tags ===
+
+  function getTagForWord(word, listId) {
+    const list = listId ? getWordList(listId) : null;
+    if (!list) {
+      // Search all lists for the word
+      const lists = getWordLists();
+      for (const l of lists) {
+        if (l.words.map(w => w.toLowerCase()).includes(word.toLowerCase())) {
+          return _resolveTag(l, word);
+        }
+      }
+      return null;
+    }
+    return _resolveTag(list, word);
+  }
+
+  function _resolveTag(list, word) {
+    const key = word.toLowerCase();
+    if (list.tags && list.tags[key]) {
+      return list.tags[key];
+    }
+    return list.defaultTag || null;
+  }
+
   // === Settings ===
 
   function getSettings() {
@@ -152,6 +177,7 @@ const Storage = (() => {
     getProgressForWord,
     recordAttempt,
     getAllWords,
+    getTagForWord,
     getSettings,
     saveSettings,
   };

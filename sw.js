@@ -1,9 +1,10 @@
-const CACHE_NAME = 'spell-stars-v1';
+const CACHE_NAME = 'spell-stars-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './css/style.css',
   './js/storage.js',
+  './js/class-lists.js',
   './js/tts.js',
   './js/spaced-rep.js',
   './js/game.js',
