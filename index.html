@@ -75,6 +75,9 @@
           <button id="btn-hear-word" class="hear-btn" onclick="Game.speakWord()">
             &#128266; Hear the Word
           </button>
+          <button id="input-mode-toggle" class="input-mode-toggle" onclick="Game.toggleInputMode()">
+            &#9997; Write
+          </button>
         </div>
 
         <div id="game-board" class="game-board">
@@ -119,6 +122,20 @@
             <button class="key" data-key="n">N</button>
             <button class="key" data-key="m">M</button>
             <button class="key key-wide" data-key="Backspace">&#9003;</button>
+          </div>
+        </div>
+
+        <!-- Handwriting Panel (replaces keyboard when active) -->
+        <div id="handwriting-panel" class="handwriting-panel hidden">
+          <p class="hw-tip">Write neatly in print letters</p>
+          <div class="hw-canvas-container">
+            <canvas id="hw-canvas" class="hw-canvas"></canvas>
+          </div>
+          <div id="hw-preview" class="hw-preview">Write the word above</div>
+          <div id="hw-alternatives" class="hw-alternatives"></div>
+          <div class="hw-buttons">
+            <button class="hw-btn hw-btn-clear" onclick="Handwriting.clear()">Clear</button>
+            <button class="hw-btn hw-btn-submit" onclick="Handwriting.submit()">Submit</button>
           </div>
         </div>
 
@@ -229,11 +246,11 @@
     <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
   </div>
 
-  <script src="https://js.puter.com/v2/" defer></script>
   <script src="js/storage.js"></script>
   <script src="js/class-lists.js"></script>
   <script src="js/tts.js"></script>
   <script src="js/spaced-rep.js"></script>
+  <script src="js/handwriting.js"></script>
   <script src="js/game.js"></script>
   <script src="js/ocr.js"></script>
   <script src="js/progress.js"></script>

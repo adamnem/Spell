@@ -16,6 +16,8 @@ const Game = (() => {
   let totalWordsInSession = 0;
   let lengthRevealed = false;
   let currentWordTag = null;
+  let inputMode = 'keyboard'; // 'keyboard' or 'handwriting'
+  let hwInitialized = false;
 
   // Keyboard state
   let keyStates = {};
@@ -77,6 +79,11 @@ const Game = (() => {
     clearMessage();
     hideLengthHint();
 
+    // Clear handwriting canvas if in write mode
+    if (inputMode === 'handwriting' && hwInitialized) {
+      Handwriting.clear();
+    }
+
     // Speak the word after a brief delay
     setTimeout(() => speakWord(), 400);
   }
@@ -108,14 +115,20 @@ const Game = (() => {
           rowEl.appendChild(tile);
         }
       } else if (row === guessNumber && !gameOver) {
-        // Current row - show what's been typed
-        const wordLen = lengthRevealed ? currentWord.length : Math.max(currentGuess.length, 1);
-        const displayLen = lengthRevealed ? currentWord.length : Math.max(currentGuess.length, 5);
-
-        for (let col = 0; col < displayLen; col++) {
-          const letter = col < currentGuess.length ? currentGuess[col] : '';
-          const tile = createTile(letter, letter ? 'filled' : 'empty');
+        if (inputMode === 'handwriting' && currentGuess.length === 0) {
+          // Handwriting mode: show a single placeholder tile with pen icon
+          const tile = document.createElement('div');
+          tile.className = 'tile hw-placeholder';
+          tile.textContent = '\u270D';
           rowEl.appendChild(tile);
+        } else {
+          // Keyboard mode or guess just submitted: show typed letters
+          const displayLen = lengthRevealed ? currentWord.length : Math.max(currentGuess.length, 5);
+          for (let col = 0; col < displayLen; col++) {
+            const letter = col < currentGuess.length ? currentGuess[col] : '';
+            const tile = createTile(letter, letter ? 'filled' : 'empty');
+            rowEl.appendChild(tile);
+          }
         }
       } else if (lengthRevealed) {
         // Empty future row with known length
@@ -376,6 +389,49 @@ const Game = (() => {
     el.textContent = `Word ${wordCount} of ${totalWordsInSession}`;
   }
 
+  // === Input Mode Toggle ===
+
+  function toggleInputMode() {
+    setInputMode(inputMode === 'keyboard' ? 'handwriting' : 'keyboard');
+  }
+
+  function setInputMode(newMode) {
+    inputMode = newMode;
+    const keyboard = document.getElementById('keyboard');
+    const hwPanel = document.getElementById('handwriting-panel');
+    const toggleBtn = document.getElementById('input-mode-toggle');
+
+    if (newMode === 'handwriting') {
+      keyboard.classList.add('hidden');
+      hwPanel.classList.remove('hidden');
+      if (toggleBtn) toggleBtn.innerHTML = '&#9000; Keyboard';
+
+      if (!hwInitialized) {
+        const cvs = document.getElementById('hw-canvas');
+        Handwriting.init(cvs, handleHandwritingSubmit);
+        hwInitialized = true;
+      } else {
+        Handwriting.clear();
+        Handwriting.resize();
+      }
+
+      renderBoard();
+    } else {
+      keyboard.classList.remove('hidden');
+      hwPanel.classList.add('hidden');
+      if (toggleBtn) toggleBtn.innerHTML = '&#9997; Write';
+
+      renderBoard();
+    }
+  }
+
+  function handleHandwritingSubmit(text) {
+    if (gameOver || !text) return;
+    currentGuess = text;
+    renderBoard();
+    submitGuess();
+  }
+
   // === Keyboard Event Listeners ===
 
   function setupKeyboard() {
@@ -413,6 +469,7 @@ const Game = (() => {
     nextWord,
     speakWord,
     handleKey,
+    toggleInputMode,
   };
 })();
 
