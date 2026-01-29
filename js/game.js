@@ -288,16 +288,49 @@ const Game = (() => {
     }
   }
 
+  // === Encouragement Phrases ===
+
+  const WIN_TITLES = [
+    'Genius!', 'Magnificent!', 'Brilliant!', 'Spectacular!',
+    'Phenomenal!', 'Outstanding!', 'Superb!', 'Fantastic!',
+    'Incredible!', 'Marvelous!', 'Wonderful!', 'Excellent!',
+    'Amazing!', 'Splendid!', 'Sensational!', 'Tremendous!',
+    'Dazzling!', 'Legendary!', 'Glorious!', 'Stellar!',
+  ];
+
+  const WIN_SPOKEN = [
+    'Magnificent job!', 'Brilliant work!', 'Spectacular spelling!',
+    'You are phenomenal!', 'Outstanding job!', 'Superb work!',
+    'Fantastic spelling!', 'Incredible job!', 'Marvelous work!',
+    'Wonderful job!', 'Excellent spelling!', 'Amazing work!',
+    'Splendid job!', 'Sensational spelling!', 'Tremendous job!',
+    'You are a spelling star!', 'What a superstar!', 'You nailed it!',
+    'Way to go!', 'You crushed it!', 'That was awesome!',
+    'You are on fire!', 'Absolutely perfect!', 'Top notch spelling!',
+  ];
+
+  const LOSS_TITLES = [
+    "Keep going!", "Almost there!", "Don't give up!",
+    "You're learning!", "Nice try!", "So close!",
+    "Getting better!", "Keep practicing!", "You've got this!",
+  ];
+
+  const LOSS_SPOKEN = [
+    "You'll get it next time!", "Keep practicing, you're getting better!",
+    "Great effort! You're learning!", "Don't worry, practice makes perfect!",
+    "So close! Try again soon!", "You're getting stronger every time!",
+    "Keep at it, spelling star!", "That was a tough one! You'll get it!",
+  ];
+
+  function _randomFrom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
   function showWin(attempts) {
     Storage.recordAttempt(currentWord, attempts, true);
 
-    const messages = [
-      'Genius!', 'Magnificent!', 'Impressive!',
-      'Splendid!', 'Great!', 'Phew!'
-    ];
-
     document.getElementById('result-icon').textContent = '\u{1F31F}';
-    document.getElementById('result-title').textContent = messages[attempts - 1] || 'Well done!';
+    document.getElementById('result-title').textContent = _randomFrom(WIN_TITLES);
     document.getElementById('result-message').textContent =
       attempts === 1 ? 'You got it on the first try!' : `You got it in ${attempts} tries!`;
     document.getElementById('result-word').textContent = currentWord;
@@ -310,14 +343,14 @@ const Game = (() => {
 
     // Celebration!
     Confetti.launch();
-    TTS.speakEncouragement('Great job!');
+    TTS.speakEncouragement(_randomFrom(WIN_SPOKEN));
   }
 
   function showLoss() {
     Storage.recordAttempt(currentWord, MAX_GUESSES, false);
 
     document.getElementById('result-icon').textContent = '\u{1F4AA}';
-    document.getElementById('result-title').textContent = "Let's keep trying!";
+    document.getElementById('result-title').textContent = _randomFrom(LOSS_TITLES);
     document.getElementById('result-message').textContent =
       'The word was:';
     document.getElementById('result-word').textContent = currentWord;
@@ -328,7 +361,9 @@ const Game = (() => {
     const btns = document.querySelector('.result-buttons');
     btns.children[0].classList.remove('hidden');
 
-    TTS.speakEncouragement(`The word was ${currentWord}. You'll get it next time!`);
+    TTS.speakEncouragement(
+      `The word was ${currentWord}. ` + _randomFrom(LOSS_SPOKEN)
+    );
   }
 
   function hideResult() {
