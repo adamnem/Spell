@@ -296,6 +296,8 @@ const Game = (() => {
     'Incredible!', 'Marvelous!', 'Wonderful!', 'Excellent!',
     'Amazing!', 'Splendid!', 'Sensational!', 'Tremendous!',
     'Dazzling!', 'Legendary!', 'Glorious!', 'Stellar!',
+    'Rizz!', 'No Cap!', 'Slay!', 'Fire!', 'W Spelling!',
+    'Goated!', 'Bussin!', 'Lit!',
   ];
 
   const WIN_SPOKEN = [
@@ -307,12 +309,17 @@ const Game = (() => {
     'You are a spelling star!', 'What a superstar!', 'You nailed it!',
     'Way to go!', 'You crushed it!', 'That was awesome!',
     'You are on fire!', 'Absolutely perfect!', 'Top notch spelling!',
+    'No cap, that was fire!', 'You are literally goated!',
+    'That spelling is bussin!', 'Total slay!',
+    'Big W! You crushed it!', 'Sheeeesh! Perfect spelling!',
+    'Main character energy right there!', 'You ate that up!',
   ];
 
   const LOSS_TITLES = [
     "Keep going!", "Almost there!", "Don't give up!",
     "You're learning!", "Nice try!", "So close!",
     "Getting better!", "Keep practicing!", "You've got this!",
+    "Not yet, fam!", "Oof, close one!", "No cap, you'll get it!",
   ];
 
   const LOSS_SPOKEN = [
@@ -320,6 +327,9 @@ const Game = (() => {
     "Great effort! You're learning!", "Don't worry, practice makes perfect!",
     "So close! Try again soon!", "You're getting stronger every time!",
     "Keep at it, spelling star!", "That was a tough one! You'll get it!",
+    "No cap, you're getting better every time!",
+    "That word is sus but you'll get it next time!",
+    "Not a W yet, but you're leveling up!",
   ];
 
   function _randomFrom(arr) {
