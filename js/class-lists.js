@@ -25,6 +25,25 @@ const ClassLists = (() => {
       },
       defaultTag: 'long e/ee vowel sounds',
     },
+    {
+      id: 'class-test-2026-02-10',
+      label: 'Long a /ae/ vowel sounds',
+      testDate: '2026-02-10',
+      words: [
+        'daydreams', 'subway', 'daisies', 'awaited', 'yesterday',
+        'crayons', 'betrayer', 'explain', 'mermaid', 'payment',
+        'giveaway', 'great', 'dainty', 'breaker', 'obtain',
+        'ballplayers', 'beefsteak', 'trainees',
+        'straight',
+        'family', 'young',
+      ],
+      tags: {
+        'straight': 'content word',
+        'family': 'challenge word',
+        'young': 'challenge word',
+      },
+      defaultTag: 'long a /ae/ vowel sounds',
+    },
   ];
 
   /**
